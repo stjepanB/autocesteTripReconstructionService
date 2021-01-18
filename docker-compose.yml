@@ -1,0 +1,22 @@
+services:
+
+  reconstruction:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trip_reconstruction
+    ports:
+      -"22233:7888"
+    environment:
+      -SPRING_DATASOURCE_URL= "TODO"
+    depends_on:
+      -mongo_db:
+          condition: service_healthy
+
+
+  mongo_db:
+    image: mongo:bionic
+    container_name: trip_reconstruction_db
+    port:
+      - "27017:27017"
+    command: --smallfiles
