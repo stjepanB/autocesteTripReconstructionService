@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
 
 @Document(collection = "records")
-public class DefaultRecord {
+public class DefaultRecord implements Comparable<DefaultRecord> {
 
     @Transient
     public static final String SEQUENCE_NAME = "records_sequence";
@@ -21,6 +21,8 @@ public class DefaultRecord {
     private String plateMark;
     @NonNull
     private String location;
+    @NonNull
+    private Direction direction;
 
     public Long getId() {
         return id;
@@ -55,5 +57,19 @@ public class DefaultRecord {
 
     public void setLocation(@NonNull String location) {
         this.location = location;
+    }
+
+    @NonNull
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(@NonNull Direction direction) {
+        this.direction = direction;
+    }
+
+    @Override
+    public int compareTo(DefaultRecord o) {
+        return this.getRecordedTime().compareTo(o.getRecordedTime());
     }
 }
