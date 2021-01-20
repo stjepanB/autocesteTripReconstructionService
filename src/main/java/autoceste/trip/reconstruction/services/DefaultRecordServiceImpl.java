@@ -1,10 +1,13 @@
 package autoceste.trip.reconstruction.services;
 
 import autoceste.trip.reconstruction.models.DefaultRecord;
+import autoceste.trip.reconstruction.models.HighwaySection;
+import autoceste.trip.reconstruction.models.HighwaySectionDto;
 import autoceste.trip.reconstruction.models.Trip;
 import autoceste.trip.reconstruction.repositories.DefaultRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,21 +16,34 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@PropertySource("classpath:application.properties")
 public class DefaultRecordServiceImpl implements DefaultRecordService {
 
     private final DefaultRecordRepository recordRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
     private final Map<String, List<DefaultRecord>> activeRecords;
-    @Value("http://localhost:8080/employees/")
-    private String BACKEND_URL;
+    @Value("${backend.url}")
+    private String BACKEND_URL = "http://localhost:9000/api/service";
+    private List<HighwaySection> sections;
 
     @Autowired
     public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, SequenceGeneratorService sequenceGeneratorService) {
         this.recordRepository = recordRepository;
         this.sequenceGeneratorService = sequenceGeneratorService;
         activeRecords = Collections.synchronizedMap(new HashMap<>());
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<HighwaySectionDto[]> response =
+                restTemplate.getForEntity(
+                        BACKEND_URL + "/sections",
+                        HighwaySectionDto[].class);
+
+        this.sections = Arrays.stream(response.getBody())
+                .map(HighwaySectionDto::toHighwaySections)
+                .collect(Collectors.toList());
+
     }
 
     @Override
@@ -44,7 +60,7 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
         return recordRepository.saveAll(recordList).get(0).getId() != null;
     }
 
-    @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 0 4/1 * * *")
     public void reconstructTrips() {
         Set<String> keys = activeRecords.keySet();
         List<Trip> trips = new ArrayList<>();
@@ -76,14 +92,14 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
 
     private Trip createTrip(List<DefaultRecord> records) {
         Collections.sort(records);
-        return new Trip(records.get(0).getPlateMark(), records.get(0), records.get(records.size() - 1));
+        return new Trip(records.get(0), records.get(records.size() - 1));
     }
 
     private boolean saveTrips(List<Trip> trips) {
         RestTemplate restTemplate = new RestTemplate();
 
         ResponseEntity response = restTemplate.postForObject(
-                BACKEND_URL, trips, ResponseEntity.class);
+                BACKEND_URL + "/bill", trips, ResponseEntity.class);
 
         return response != null && response.getStatusCode() == HttpStatus.OK;
     }

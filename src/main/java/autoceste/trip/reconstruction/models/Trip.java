@@ -1,15 +1,25 @@
 package autoceste.trip.reconstruction.models;
 
+import com.mongodb.lang.NonNull;
+
+import java.time.LocalDateTime;
+
 public class Trip {
 
     private String plateMark;
-    private DefaultRecord entry;
-    private DefaultRecord exit;
+    private LocalDateTime recordedTimeEntry;
+    private LocalDateTime recordedTimeExit;
+    private String locationEntry;
+    private String locationExit;
+    private Direction direction;
 
-    public Trip(String plateMark, DefaultRecord entry, DefaultRecord exit) {
-        this.plateMark = plateMark;
-        this.entry = entry;
-        this.exit = exit;
+    public Trip(DefaultRecord entry, DefaultRecord exit) {
+        this.plateMark = entry.getPlateMark();
+        this.recordedTimeEntry = entry.getRecordedTime();
+        this.recordedTimeExit = exit.getRecordedTime();
+        this.locationEntry = entry.getLocation();
+        this.locationExit = exit.getLocation();
+        this.direction = exit.getDirection();
     }
 
     public String getPlateMark() {
@@ -20,19 +30,43 @@ public class Trip {
         this.plateMark = plateMark;
     }
 
-    public DefaultRecord getEntry() {
-        return entry;
+    public LocalDateTime getRecordedTimeEntry() {
+        return recordedTimeEntry;
     }
 
-    public void setEntry(DefaultRecord entry) {
-        this.entry = entry;
+    public void setRecordedTimeEntry(LocalDateTime recordedTimeEntry) {
+        this.recordedTimeEntry = recordedTimeEntry;
     }
 
-    public DefaultRecord getExit() {
-        return exit;
+    public LocalDateTime getRecordedTimeExit() {
+        return recordedTimeExit;
     }
 
-    public void setExit(DefaultRecord exit) {
-        this.exit = exit;
+    public void setRecordedTimeExit(LocalDateTime recordedTimeExit) {
+        this.recordedTimeExit = recordedTimeExit;
+    }
+
+    public String getLocationEntry() {
+        return locationEntry;
+    }
+
+    public void setLocationEntry(String locationEntry) {
+        this.locationEntry = locationEntry;
+    }
+
+    public String getLocationExit() {
+        return locationExit;
+    }
+
+    public void setLocationExit(String locationExit) {
+        this.locationExit = locationExit;
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 }
