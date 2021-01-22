@@ -19,18 +19,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@PropertySource("classpath:application.properties")
 public class DefaultRecordServiceImpl implements DefaultRecordService {
 
     private final DefaultRecordRepository recordRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
     private final Map<String, List<DefaultRecord>> activeRecords;
     @Value("${backend.url}")
-    private String BACKEND_URL = "http://localhost:9000/api/service";
-    private List<List<HighwaySection>> sections;
+    private final String BACKEND_URL;
 
     @Autowired
-    public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, SequenceGeneratorService sequenceGeneratorService) {
+    public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, SequenceGeneratorService sequenceGeneratorService,
+                                    @Value("${backend.url}") String url) {
+        this.BACKEND_URL = url;
         this.recordRepository = recordRepository;
         this.sequenceGeneratorService = sequenceGeneratorService;
         activeRecords = Collections.synchronizedMap(new HashMap<>());
@@ -65,7 +65,6 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
                 RIJEKA_DIRECTION = false;
             }
         }
-
         roads.forEach(e -> e.forEach(System.out::println));
 
     }
