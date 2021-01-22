@@ -1,8 +1,8 @@
 package autoceste.trip.reconstruction.models;
 
-import com.mongodb.lang.NonNull;
-
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Trip {
 
@@ -11,9 +11,15 @@ public class Trip {
     private LocalDateTime recordedTimeExit;
     private String locationEntry;
     private String locationExit;
+    private List<String> locations;
     private Direction direction;
 
-    public Trip(DefaultRecord entry, DefaultRecord exit) {
+    public Trip(List<DefaultRecord> records) {
+        DefaultRecord entry = records.get(0);
+        DefaultRecord exit = records.get(records.size() - 1);
+        this.locations = records.stream()
+                .map(DefaultRecord::getLocation)
+                .collect(Collectors.toList());
         this.plateMark = entry.getPlateMark();
         this.recordedTimeEntry = entry.getRecordedTime();
         this.recordedTimeExit = exit.getRecordedTime();
@@ -68,5 +74,13 @@ public class Trip {
 
     public void setDirection(Direction direction) {
         this.direction = direction;
+    }
+
+    public List<String> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(List<String> locations) {
+        this.locations = locations;
     }
 }

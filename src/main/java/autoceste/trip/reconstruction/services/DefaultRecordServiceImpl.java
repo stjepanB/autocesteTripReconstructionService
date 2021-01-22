@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -123,12 +124,11 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
 
     private Trip createTrip(List<DefaultRecord> records) {
         Collections.sort(records);
+        //TODO : ŽELIM PROVJERITI IMA LI POGREŠAKA U REKONSTRUKCIJI
+        // Prikupljene recorde treba rekonstruirati i poslati nazad
+        // sveukupan put u koji ulaze i nezabilježene dionice
 
-        for (DefaultRecord r : records) {
-            int i = 0;
-
-        }
-        return new Trip(records.get(0), records.get(records.size() - 1));
+        return new Trip(records);
     }
 
     private boolean saveTrips(List<Trip> trips) {
