@@ -1,23 +1,14 @@
 package autoceste.trip.reconstruction.services;
 
 import autoceste.trip.reconstruction.models.DefaultRecord;
-import autoceste.trip.reconstruction.models.HighwaySection;
-import autoceste.trip.reconstruction.models.HighwaySectionDto;
 import autoceste.trip.reconstruction.models.Trip;
 import autoceste.trip.reconstruction.repositories.DefaultRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DefaultRecordServiceImpl implements DefaultRecordService {
@@ -25,28 +16,21 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
     private final DefaultRecordRepository recordRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
     private final Map<String, List<DefaultRecord>> activeRecords;
-    @Value("${backend.url}")
-    private final String BACKEND_URL;
+
+    private final List<List<String>> roads;
+    private final CommunicationService communicationService;
 
     @Autowired
     public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, SequenceGeneratorService sequenceGeneratorService,
-                                    @Value("${backend.url}") String url) {
-        this.BACKEND_URL = url;
+                                    CommunicationService communicationService) {
         this.recordRepository = recordRepository;
+        this.communicationService = communicationService;
         this.sequenceGeneratorService = sequenceGeneratorService;
         activeRecords = Collections.synchronizedMap(new HashMap<>());
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<HighwaySectionDto[]> response =
-                restTemplate.getForEntity(
-                        BACKEND_URL + "/sections",
-                        HighwaySectionDto[].class);
 
-        List<String> sections = Arrays.stream(Objects.requireNonNull(response.getBody()))
-                .map(HighwaySectionDto::toHighwaySections)
-                .map(HighwaySection::getSectionStart)
-                .collect(Collectors.toList());
+        List<String> sections = communicationService.getSections();
 
-        List<List<String>> roads = new ArrayList<>();
+        roads = new ArrayList<>();
 
         roads.add(new ArrayList<>());
         boolean RIJEKA_DIRECTION = true;
@@ -106,7 +90,7 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
         if (trips.isEmpty()) {
             return;
         }
-        saveTrips(trips);
+        communicationService.saveTrips(trips);
         removeReconstructedTrips(trips);
 
     }
@@ -122,22 +106,40 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
         return recent;
     }
 
-    private Trip createTrip(List<DefaultRecord> records) {
+    public Trip createTrip(List<DefaultRecord> records) {
         Collections.sort(records);
-        //TODO : ŽELIM PROVJERITI IMA LI POGREŠAKA U REKONSTRUKCIJI
-        // Prikupljene recorde treba rekonstruirati i poslati nazad
-        // sveukupan put u koji ulaze i nezabilježene dionice
+        List<String> trip = new ArrayList<>();
 
-        return new Trip(records);
-    }
+        for (List<String> road : roads) {
+            boolean wrongRoad = false;
+            for (DefaultRecord r : records) {
+                if (!road.contains(r.getLocation())) {
+                    wrongRoad = true;
+                    break;
+                }
+            }
+            if (wrongRoad) {
+                continue;
+            }
 
-    private boolean saveTrips(List<Trip> trips) {
-        RestTemplate restTemplate = new RestTemplate();
+            int index = road.indexOf(records.get(0).getLocation());
+            int endIndex = road.indexOf(records.get(records.size() - 1).getLocation());
 
-        var response = restTemplate.postForObject(
-                BACKEND_URL + "/billing", trips, ResponseEntity.class);
+            if (index > endIndex) {
+                for (int i = index; i >= endIndex; i--) {
+                    trip.add(road.get(i));
+                }
+                return new Trip(records, trip);
 
-        return response != null && response.getStatusCode() == HttpStatus.OK;
+            } else {
+                for (int i = index; i <= endIndex; i++) {
+                    trip.add(road.get(i));
+                }
+                return new Trip(records, trip);
+            }
+        }
+
+        return new Trip(records, trip);
     }
 
     private void removeReconstructedTrips(List<Trip> trips) {

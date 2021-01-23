@@ -9,9 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableConfigurationProperties
 public class ReconstructionApplication {
-
-	public static void main(String[] args) {
-		SpringApplication.run(ReconstructionApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ReconstructionApplication.class, args);
+    }
 }

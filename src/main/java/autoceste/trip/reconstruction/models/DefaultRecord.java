@@ -24,6 +24,16 @@ public class DefaultRecord implements Comparable<DefaultRecord> {
     @NonNull
     private Direction direction;
 
+    public DefaultRecord() {
+    }
+
+    public DefaultRecord(@NonNull LocalDateTime recordedTime, @NonNull String plateMark, @NonNull String location, @NonNull Direction direction) {
+        this.recordedTime = recordedTime;
+        this.plateMark = plateMark;
+        this.location = location;
+        this.direction = direction;
+    }
+
     public Long getId() {
         return id;
     }

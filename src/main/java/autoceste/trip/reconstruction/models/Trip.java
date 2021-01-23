@@ -28,6 +28,18 @@ public class Trip {
         this.direction = exit.getDirection();
     }
 
+    public Trip(List<DefaultRecord> records, List<String> reconstructed) {
+        DefaultRecord entry = records.get(0);
+        DefaultRecord exit = records.get(records.size() - 1);
+        this.locations = reconstructed;
+        this.plateMark = entry.getPlateMark();
+        this.recordedTimeEntry = entry.getRecordedTime();
+        this.recordedTimeExit = exit.getRecordedTime();
+        this.locationEntry = entry.getLocation();
+        this.locationExit = exit.getLocation();
+        this.direction = exit.getDirection();
+    }
+
     public String getPlateMark() {
         return plateMark;
     }
