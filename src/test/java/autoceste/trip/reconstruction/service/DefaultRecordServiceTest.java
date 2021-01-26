@@ -1,21 +1,15 @@
 package autoceste.trip.reconstruction.service;
 
 import autoceste.trip.reconstruction.models.DefaultRecord;
-import autoceste.trip.reconstruction.models.Direction;
-import autoceste.trip.reconstruction.models.Trip;
 import autoceste.trip.reconstruction.repositories.DefaultRecordRepository;
 import autoceste.trip.reconstruction.services.*;
-import com.mongodb.lang.NonNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.mongodb.core.MongoOperations;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -70,18 +64,15 @@ public class DefaultRecordServiceTest {
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 12, 12),
                         "ST1233NB",
-                        "Jastrebarsko",
-                        Direction.A),
+                        "Jastrebarsko"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 13, 0),
                         "ST1233NB",
-                        "Zdenčina",
-                        Direction.A),
+                        "Zdenčina"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 13, 20),
                         "ST1233NB",
-                        "Lučko",
-                        Direction.A)
+                        "Lučko")
         );
 
         backward_result = Arrays.asList(
@@ -91,23 +82,19 @@ public class DefaultRecordServiceTest {
                 new DefaultRecord(
                         LocalDateTime.of(2020, 9, 13, 10, 12),
                         "ZG1233NB",
-                        "Lučko",
-                        Direction.A),
+                        "Lučko"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 13, 0),
                         "ZG1233NB",
-                        "Zdenčina",
-                        Direction.A),
+                        "Zdenčina"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 13, 20),
                         "ZG1233NB",
-                        "Novigrad",
-                        Direction.A),
+                        "Novigrad"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 11, 11, 13, 20),
                         "ZG1233NB",
-                        "Bosiljevo",
-                        Direction.A)
+                        "Bosiljevo")
         );
 
         forward_result = Arrays.asList(
@@ -117,26 +104,22 @@ public class DefaultRecordServiceTest {
                 new DefaultRecord(
                         LocalDateTime.of(2020, 10, 9, 9, 1),
                         "ZG1133NB",
-                        "Zdenčina",
-                        Direction.A),
+                        "Zdenčina"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 10, 9, 9, 20),
                         "ZG1133NB",
-                        "Karlovac",
-                        Direction.A),
+                        "Karlovac"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 10, 9, 10, 20),
                         "ZG1133NB",
-                        "Bosiljevo",
-                        Direction.A),
+                        "Bosiljevo"),
                 new DefaultRecord(
                         LocalDateTime.of(2020, 10, 9, 13, 20),
                         "ZG1133NB",
-                        "Vrbovsko",
-                        Direction.A)
+                        "Vrbovsko")
         );
         discRoad_result = Arrays.asList(
-                 "Zdenčina", "Jastrebarsko", "Karlovac", "Novigrad", "Bosiljevo", "Vrbovsko"
+                "Zdenčina", "Jastrebarsko", "Karlovac", "Novigrad", "Bosiljevo", "Vrbovsko"
         );
         Map<String, List<DefaultRecord>> activeMap = Map.of("ST1233NB", backward, "ZG1233NB", forward, "ZG1133NB", discRoad);
         doReturn(this.sections).when(communicationService).getSections();

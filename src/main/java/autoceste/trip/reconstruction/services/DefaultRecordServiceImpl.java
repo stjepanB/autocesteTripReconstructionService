@@ -69,30 +69,32 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
     @Override
     public boolean addRecords(List<DefaultRecord> recordList) {
         recordList.forEach(e -> e.setId(sequenceGeneratorService.generateSequence(DefaultRecord.SEQUENCE_NAME)));
+        recordList.stream()
+                .filter(e -> !activeRecords.containsKey(e.getPlateMark()))
+                .forEach(e -> activeRecords.put(e.getPlateMark(), new ArrayList<>()));
         recordList.forEach(e -> activeRecords.get(e.getPlateMark()).add(e));
         return recordRepository.saveAll(recordList).get(0).getId() != null;
     }
 
-    @Scheduled(cron = "0 0 4/1 * * *")
+    @Scheduled(cron = "0/5 * * * * *")
     public void reconstructTrips() {
         Set<String> keys = activeRecords.keySet();
         List<Trip> trips = new ArrayList<>();
+        System.out.println("Saved trips");
 
         for (String key : keys) {
             List<DefaultRecord> records = activeRecords.get(key);
 
             LocalDateTime recent = findNewestRecord(records);
 
-            if (recent.isBefore(LocalDateTime.now().minusHours(12L))) {
-                trips.add(createTrip(records));
-            }
+            trips.add(createTrip(records));
         }
         if (trips.isEmpty()) {
             return;
         }
+
         communicationService.saveTrips(trips);
         removeReconstructedTrips(trips);
-
     }
 
     private LocalDateTime findNewestRecord(List<DefaultRecord> records) {

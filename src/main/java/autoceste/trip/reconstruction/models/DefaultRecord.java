@@ -1,11 +1,14 @@
 package autoceste.trip.reconstruction.models;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mongodb.lang.NonNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Document(collection = "records")
 public class DefaultRecord implements Comparable<DefaultRecord> {
@@ -21,17 +24,14 @@ public class DefaultRecord implements Comparable<DefaultRecord> {
     private String plateMark;
     @NonNull
     private String location;
-    @NonNull
-    private Direction direction;
 
     public DefaultRecord() {
     }
 
-    public DefaultRecord(@NonNull LocalDateTime recordedTime, @NonNull String plateMark, @NonNull String location, @NonNull Direction direction) {
+    public DefaultRecord(@NonNull LocalDateTime recordedTime, @NonNull String plateMark, @NonNull String location) {
         this.recordedTime = recordedTime;
         this.plateMark = plateMark;
         this.location = location;
-        this.direction = direction;
     }
 
     public Long getId() {
@@ -67,15 +67,6 @@ public class DefaultRecord implements Comparable<DefaultRecord> {
 
     public void setLocation(@NonNull String location) {
         this.location = location;
-    }
-
-    @NonNull
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(@NonNull Direction direction) {
-        this.direction = direction;
     }
 
     @Override

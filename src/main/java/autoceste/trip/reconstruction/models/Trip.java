@@ -12,7 +12,6 @@ public class Trip {
     private String locationEntry;
     private String locationExit;
     private List<String> locations;
-    private Direction direction;
 
     public Trip(List<DefaultRecord> records) {
         DefaultRecord entry = records.get(0);
@@ -25,7 +24,6 @@ public class Trip {
         this.recordedTimeExit = exit.getRecordedTime();
         this.locationEntry = entry.getLocation();
         this.locationExit = exit.getLocation();
-        this.direction = exit.getDirection();
     }
 
     public Trip(List<DefaultRecord> records, List<String> reconstructed) {
@@ -37,7 +35,6 @@ public class Trip {
         this.recordedTimeExit = exit.getRecordedTime();
         this.locationEntry = entry.getLocation();
         this.locationExit = exit.getLocation();
-        this.direction = exit.getDirection();
     }
 
     public String getPlateMark() {
@@ -78,14 +75,6 @@ public class Trip {
 
     public void setLocationExit(String locationExit) {
         this.locationExit = locationExit;
-    }
-
-    public Direction getDirection() {
-        return direction;
-    }
-
-    public void setDirection(Direction direction) {
-        this.direction = direction;
     }
 
     public List<String> getLocations() {
