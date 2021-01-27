@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -40,9 +41,13 @@ public class CommunicationInterfaceImpl implements CommunicationService {
 
     public boolean saveTrips(List<Trip> trips) {
         RestTemplate restTemplate = new RestTemplate();
-
-        var response = restTemplate.postForObject(
-                BACKEND_URL + "/billing", trips, ResponseEntity.class);
+        ResponseEntity response;
+        try {
+            response = restTemplate.postForObject(
+                    BACKEND_URL + "/billing", trips, ResponseEntity.class);
+        } catch (RestClientException e) {
+            return false;
+        }
 
         return response != null && response.getStatusCode() == HttpStatus.OK;
     }

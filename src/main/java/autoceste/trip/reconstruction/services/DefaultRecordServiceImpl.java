@@ -76,25 +76,28 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
         return recordRepository.saveAll(recordList).get(0).getId() != null;
     }
 
-    @Scheduled(cron = "0/5 * * * * *")
+    @Scheduled(cron = "0 0/2 0-23 * * *")
     public void reconstructTrips() {
         Set<String> keys = activeRecords.keySet();
         List<Trip> trips = new ArrayList<>();
-        System.out.println("Saved trips");
+        System.out.println(LocalDateTime.now());
 
         for (String key : keys) {
             List<DefaultRecord> records = activeRecords.get(key);
 
             LocalDateTime recent = findNewestRecord(records);
-
-            trips.add(createTrip(records));
+            if (recent.isBefore(LocalDateTime.now().minusHours(5L))) {
+                trips.add(createTrip(records));
+            }
         }
+
         if (trips.isEmpty()) {
             return;
         }
 
-        communicationService.saveTrips(trips);
-        removeReconstructedTrips(trips);
+        if (communicationService.saveTrips(trips)) {
+            removeReconstructedTrips(trips);
+        }
     }
 
     private LocalDateTime findNewestRecord(List<DefaultRecord> records) {
