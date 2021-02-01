@@ -97,7 +97,14 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
 
         if (communicationService.saveTrips(trips)) {
             removeReconstructedTrips(trips);
+        }else {
+            logUnsucessfulSavedTrips(trips);
         }
+    }
+
+    private void logUnsucessfulSavedTrips(List<Trip> trips) {
+        trips.forEach(Object::toString);
+        removeReconstructedTrips(trips);
     }
 
     private LocalDateTime findNewestRecord(List<DefaultRecord> records) {

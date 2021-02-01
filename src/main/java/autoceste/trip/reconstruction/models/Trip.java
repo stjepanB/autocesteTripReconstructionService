@@ -84,4 +84,16 @@ public class Trip {
     public void setLocations(List<String> locations) {
         this.locations = locations;
     }
+
+    @Override
+    public String toString() {
+        return "Trip{" +
+                "plateMark='" + plateMark + '\'' +
+                ", recordedTimeEntry=" + recordedTimeEntry +
+                ", recordedTimeExit=" + recordedTimeExit +
+                ", locationEntry='" + locationEntry + '\'' +
+                ", locationExit='" + locationExit + '\'' +
+                ", locations=" + locations +
+                '}';
+    }
 }
