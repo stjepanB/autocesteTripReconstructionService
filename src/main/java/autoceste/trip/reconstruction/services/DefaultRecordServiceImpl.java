@@ -2,7 +2,9 @@ package autoceste.trip.reconstruction.services;
 
 import autoceste.trip.reconstruction.models.DefaultRecord;
 import autoceste.trip.reconstruction.models.Trip;
+import autoceste.trip.reconstruction.models.VehicleRecords;
 import autoceste.trip.reconstruction.repositories.DefaultRecordRepository;
+import autoceste.trip.reconstruction.repositories.VehicleRecordsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import java.util.*;
 public class DefaultRecordServiceImpl implements DefaultRecordService {
 
     private final DefaultRecordRepository recordRepository;
+    private final VehicleRecordsRepository vehicleRepository;
     private final SequenceGeneratorService sequenceGeneratorService;
     private final Map<String, List<DefaultRecord>> activeRecords;
 
@@ -21,9 +24,10 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
     private final CommunicationService communicationService;
 
     @Autowired
-    public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, SequenceGeneratorService sequenceGeneratorService,
+    public DefaultRecordServiceImpl(DefaultRecordRepository recordRepository, VehicleRecordsRepository vehicleRepository, SequenceGeneratorService sequenceGeneratorService,
                                     CommunicationService communicationService) {
         this.recordRepository = recordRepository;
+        this.vehicleRepository = vehicleRepository;
         this.communicationService = communicationService;
         this.sequenceGeneratorService = sequenceGeneratorService;
         activeRecords = Collections.synchronizedMap(new HashMap<>());
@@ -69,11 +73,29 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
     @Override
     public boolean addRecords(List<DefaultRecord> recordList) {
         recordList.forEach(e -> e.setId(sequenceGeneratorService.generateSequence(DefaultRecord.SEQUENCE_NAME)));
+
         recordList.stream()
                 .filter(e -> !activeRecords.containsKey(e.getPlateMark()))
                 .forEach(e -> activeRecords.put(e.getPlateMark(), new ArrayList<>()));
+
         recordList.forEach(e -> activeRecords.get(e.getPlateMark()).add(e));
+        recordList.forEach(this::addRecordToVehicle);
         return recordRepository.saveAll(recordList).get(0).getId() != null;
+    }
+
+    private void addRecordToVehicle(DefaultRecord record){
+        VehicleRecords r = vehicleRepository.findByPlate(record.getPlateMark());
+        if(r == null){
+            r = new VehicleRecords();
+            r.setPlate(record.getPlateMark());
+            r.setId(sequenceGeneratorService.generateSequence(VehicleRecords.SEQUENCE_NAME));
+            List<DefaultRecord> records = new ArrayList<>();
+            records.add(record);
+            r.setRecords(records);
+        }else {
+            r.getRecords().add(record);
+        }
+        vehicleRepository.save(r);
     }
 
     @Scheduled(cron = "0 0/2 0-23 * * *")
@@ -97,13 +119,13 @@ public class DefaultRecordServiceImpl implements DefaultRecordService {
 
         if (communicationService.saveTrips(trips)) {
             removeReconstructedTrips(trips);
-        }else {
+        } else {
             logUnsucessfulSavedTrips(trips);
         }
     }
 
     private void logUnsucessfulSavedTrips(List<Trip> trips) {
-        trips.forEach(Object::toString);
+        trips.forEach(e -> System.out.println(e.toString()));
         removeReconstructedTrips(trips);
     }
 

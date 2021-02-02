@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,7 @@ public class DefaultRecordController {
 
     @PostMapping("/records")
     public HttpStatus addRecords(@RequestBody List<DefaultRecord> recordList) {
+        System.out.println("Primio mjerenja sa senzora " + LocalDateTime.now().toString());
         return recordService.addRecords(recordList) ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
     }
 }

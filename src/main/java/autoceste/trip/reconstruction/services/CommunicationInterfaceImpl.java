@@ -3,9 +3,10 @@ package autoceste.trip.reconstruction.services;
 import autoceste.trip.reconstruction.models.HighwaySection;
 import autoceste.trip.reconstruction.models.HighwaySectionDto;
 import autoceste.trip.reconstruction.models.Trip;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -19,9 +20,11 @@ import java.util.stream.Collectors;
 public class CommunicationInterfaceImpl implements CommunicationService {
 
     private final String BACKEND_URL;
+    private ObjectMapper objectMapper;
 
-    public CommunicationInterfaceImpl(@Value("${backend.url}") String BACKEND_URL) {
+    public CommunicationInterfaceImpl(@Value("${backend.url}") String BACKEND_URL, ObjectMapper objectMapper) {
         this.BACKEND_URL = BACKEND_URL;
+        this.objectMapper = objectMapper;
     }
 
     public List<String> getSections() {
@@ -41,11 +44,17 @@ public class CommunicationInterfaceImpl implements CommunicationService {
 
     public boolean saveTrips(List<Trip> trips) {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity response;
+        ResponseEntity<String> response;
+
         try {
-            response = restTemplate.postForObject(
-                    BACKEND_URL + "/billing", trips, ResponseEntity.class);
-        } catch (RestClientException e) {
+            String userJsonList = objectMapper.writeValueAsString(trips);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(userJsonList, headers);
+            restTemplate.postForEntity(BACKEND_URL + "/billing", entity, String.class);
+            response = restTemplate.postForEntity(BACKEND_URL + "/billing", entity, String.class);
+
+        } catch (RestClientException | JsonProcessingException e) {
             return false;
         }
 

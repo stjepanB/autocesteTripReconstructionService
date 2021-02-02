@@ -2,6 +2,7 @@ package autoceste.trip.reconstruction.service;
 
 import autoceste.trip.reconstruction.models.DefaultRecord;
 import autoceste.trip.reconstruction.repositories.DefaultRecordRepository;
+import autoceste.trip.reconstruction.repositories.VehicleRecordsRepository;
 import autoceste.trip.reconstruction.services.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,9 @@ public class DefaultRecordServiceTest {
 
     @MockBean
     private DefaultRecordRepository repository;
+
+    @MockBean
+    private VehicleRecordsRepository vehicleRepository;
 
     @MockBean
     private SequenceGeneratorService sequenceGeneratorService;
@@ -124,7 +128,7 @@ public class DefaultRecordServiceTest {
         Map<String, List<DefaultRecord>> activeMap = Map.of("ST1233NB", backward, "ZG1233NB", forward, "ZG1133NB", discRoad);
         doReturn(this.sections).when(communicationService).getSections();
         defaultRecordService = new DefaultRecordServiceImpl(repository,
-                sequenceGeneratorService, communicationService);
+                vehicleRepository, sequenceGeneratorService, communicationService);
     }
 
     @Test
