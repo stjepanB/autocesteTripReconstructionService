@@ -1,7 +1,8 @@
 <h1 align="center">Autoceste trip reconstruction service</h1>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/Spring%20Boot-2.4-brightgreen">
+    <img src="https://img.shields.io/badge/Spring%20Boot-2.4-brightgreen"> 
+    <img src="https://img.shields.io/badge/mongo-4.2-green">
 </p>
 
 ---
