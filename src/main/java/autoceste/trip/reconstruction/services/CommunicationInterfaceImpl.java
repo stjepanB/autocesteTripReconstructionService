@@ -8,12 +8,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,11 +30,12 @@ public class CommunicationInterfaceImpl implements CommunicationService {
     }
 
     public List<String> getSections() {
+        ResponseEntity<HighwaySectionDto[]> response;
+
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<HighwaySectionDto[]> response =
-                restTemplate.getForEntity(
-                        BACKEND_URL + "/sections",
-                        HighwaySectionDto[].class);
+        response = restTemplate.getForEntity(
+                BACKEND_URL + "/sections",
+                HighwaySectionDto[].class);
 
         List<String> sections = Arrays.stream(Objects.requireNonNull(response.getBody()))
                 .map(HighwaySectionDto::toHighwaySections)

@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class ReconstructionApplicationTests {
 
-	@Test
 	void contextLoads() {
 	}
 
